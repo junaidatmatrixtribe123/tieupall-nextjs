@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import RefreshToken from "@/models/RefreshToken";
-import User from "@/models/User";
+import { dbModels } from "@/models";
 
 type ParamTypes = {
   email: string;
@@ -17,7 +17,9 @@ export default async function handler(
   const ipAddress: string = "192.168.100.71";
   if (req.method === "POST") {
     const { email, password }: ParamTypes = req.body;
-    const user: User | null = await User.findOne({ where: { email } });
+    const user: dbModels.User | null = await dbModels.User.findOne({
+      where: { email },
+    });
     if (
       !user ||
       !user.isVerified ||
@@ -41,14 +43,17 @@ export default async function handler(
   }
 }
 
-function generateJwtToken(user: User): string {
+function generateJwtToken(user: dbModels.User): string {
   // create a jwt token containing the user id that expires in 15 minutes
   return jwt.sign({ sub: user.id, id: user.id }, "API_SET", {
     expiresIn: "15m",
   });
 }
 
-function generateRefreshToken(user: User, ipAddress: string): RefreshToken {
+function generateRefreshToken(
+  user: dbModels.User,
+  ipAddress: string
+): RefreshToken {
   // create a refresh token that expires in 7 days
   return new RefreshToken({
     userId: user.id,
@@ -62,7 +67,7 @@ function randomTokenString(): string {
   return crypto.randomBytes(40).toString("hex");
 }
 
-function basicDetails(user: User): any {
+function basicDetails(user: dbModels.User): any {
   const {
     id,
     title,
@@ -88,4 +93,3 @@ function basicDetails(user: User): any {
     isVerified,
   };
 }
-

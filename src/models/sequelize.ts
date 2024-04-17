@@ -22,4 +22,6 @@ const sequelize = new Sequelize(
   }
 })();
 
+// sequelize.sync({ alter: true });
+
 export default sequelize;
